@@ -1,0 +1,233 @@
+// LinkedList.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+template <typename T>
+class my_iterator {
+    T obj;
+public:
+    my_iterator() {}
+    my_iterator(T obj) :obj(obj) {}
+    my_iterator operator++() {
+        ++obj;
+        return *this;
+    }
+
+    decltype(*obj) operator*() {
+        return (*obj);
+    }
+
+    T getObj() { return obj; }
+
+};
+
+
+template <typename T>
+class List {
+    T _data;
+    size_t _size;
+    shared_ptr<List> _next;
+    shared_ptr<List> _head;
+    shared_ptr<List> _last;
+public:
+   
+    my_iterator<List<T>> begin() {
+        return my_iterator<List<T>>(*this);
+    }
+
+    //TO DO - To implement end correctly
+    my_iterator<List<T>> end() {
+        auto cur = this;
+        while (cur->_head) {
+            cur->_head = cur->_head->_next;
+        }
+        cur->_size = _size+1;
+        return my_iterator<List<T>>(*cur);
+    }
+
+    //Default Constructor
+    List() {
+        _size = 0;
+        _next = nullptr;
+        _head = nullptr;
+        _last = nullptr;
+    }
+
+    //Construct with initializer list for uniform initialization.
+    List(const initializer_list<T>& ilist) {
+        //cout << "This is initializer list" << endl;
+        for (const auto& val : ilist )
+            _head = push_back(val);
+    }
+
+    //Parameterized constructor
+    List(T data) :_data(data) {
+        _head = this->push_back(data);
+    }
+
+    //Copy constructor
+    List(const List& obj) {
+        //cout << "calling copy constructor" << endl;
+        _data = obj._data;
+        _size = 0;
+
+        shared_ptr<List> node = obj._head;
+        while (node) {
+            _head = this->push_back(node->_data);
+            node = node->_next;
+        }
+    }
+
+    //Move constructor
+    List(List&& obj) {
+        //cout << "calling move constructor" << endl;
+        _data = move(obj._data);
+        _head = move(obj._head);
+        _next = move(obj._next);
+        _size = move(obj._size);
+        _last = move(obj._last);
+
+        obj._next = nullptr;
+        obj._head = nullptr;
+        obj._last = nullptr;
+    }
+    //copy and swap
+    List& operator=(List obj) {
+        cout << "calling copy and swap idiom" << endl;
+        return swap(obj);
+    }
+
+    List& swap(List& obj) {
+        std::swap(_data, obj._data);
+        std::swap(_next, obj._next);
+        std::swap(_head, obj._head);
+        std::swap(_size, obj._size);
+        std::swap(_last, obj._last);
+        return *this;
+    }
+
+    List operator++() {
+        if (this->_head)
+            _head = _head->_next;
+
+        return *this;
+    }
+
+    T operator*() {
+        if (this->_head)
+            return this->_head->_data;
+    }
+
+
+    shared_ptr<List> push_back(T data) {
+        shared_ptr<List> newNode = make_shared<List>();
+        newNode->_data = data;
+        newNode->_next = nullptr;
+        _size++;
+        newNode->_size = _size;
+
+        if (_head == nullptr) {
+            _head = std::move(newNode);
+            _last = _head;
+            return _head;
+        }
+
+        _last->_next = newNode;
+        _last = _last->_next;
+        return _head;
+    }
+
+    size_t getSize() {
+        return _size;
+    }
+
+    void display() {
+        shared_ptr<List> cur = _head;
+        while (cur) {
+            cout << cur->_data << endl;
+            cur = cur->_next;
+        }
+    }
+    shared_ptr<List> getNext() { return _next; }
+};
+
+
+
+//For testing
+
+class testClass {
+    int age;
+    string name;
+public:
+    testClass() {}
+    testClass(int age, string name) :age(age), name(name) {}
+    friend ostream& operator<<(ostream& obj, const testClass& data);
+   
+};
+
+ostream& operator<<(ostream& obj, const testClass& data)
+{
+    obj << data.age << "," << data.name;
+    return obj;
+}
+
+
+int main()
+{
+    List<int> aList(2);
+    aList.push_back(10);
+    aList.push_back(20);
+    aList.push_back(20);
+    aList.push_back(30);
+    cout << "size of aList " << aList.getSize() << endl;
+
+    List<int> aList2 = aList;
+    cout << "size of aList2 " << aList2.getSize() << endl;
+    //aList2.display();
+    //aList.display();
+    List<int> aList3;
+    aList3 = aList2;
+    aList3.display();
+
+    List<string> strList("Basavaraj");
+    strList.push_back("Trying for interview");
+    strList.display();
+
+    List<string> strList2 = strList;
+    strList2.display();
+    cout << "size of list2 "<< strList2.getSize() << endl;
+
+    //Constructing with initializer list
+    List<char> charList = {'a', 'b', 'c'};
+    charList.display();
+
+    List<string> strList3 = {"Hello,", "This is", "initializer list."};
+    strList3.display();
+    cout << strList3.getSize() << endl;
+    my_iterator<List<string>> aIter = strList3.begin();
+    cout << "Printing" << endl;
+    //for (; aIter != strList3.end(); ++aIter)
+    {
+        for (size_t i = 0; i <= strList3.getSize(); i++) {
+            cout << *aIter << endl;
+            ++aIter;
+        }
+    }
+            
+    testClass aTest(32, "Basavaraj");
+    List<testClass> aTestClassList;
+    aTestClassList.push_back(aTest);
+    aTestClassList.display();
+
+    List<testClass> aTest2 = {testClass(27, "shweta")};
+    aTest2.display();
+
+    aTest2 = move(aTestClassList);
+    aTest2.display();
+
+}
+
