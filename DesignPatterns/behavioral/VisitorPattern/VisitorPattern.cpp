@@ -1,6 +1,19 @@
 // VisitorPattern.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+/*
+Visitor pattern allows you to decouple the functionality from the class for which the class is not intended.
+
+example below:
+
+Person or Car need to be written to DB or file.
+But its not responsibility of that class itself.
+
+Visitor pattern will implement these (DB or File) functionality and it will be decouple from the Person or Car class.
+Person and Car class can use these functionality by adding a method in respective classes.
+
+*/
+
 #include <iostream>
 #include <string>
 using namespace std;
