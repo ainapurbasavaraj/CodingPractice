@@ -29,6 +29,24 @@ int main()
     node->insert(node, 7);
     node->insert(node, 6);
     node->insert(node, 3);
-    //node->display(node);
-    testBST();
+    node->display(node);
+    //testBST();
+
+    auto deletedNode = node->deleteNode(node, node, 6);
+    cout << "Tree after deleting" << endl;
+    node->display(deletedNode);
+    if (node->isBST(deletedNode)) {
+        cout << "This is Binary search tree" << endl;
+    }
+    else {
+        cout << "This is not Binary search treee" << endl;
+    }
+
+    //Finding the node
+    cout << "Searching for node" << endl;
+    auto tempNode = node->find(node, 7);
+    if (tempNode)
+        cout << "Found the node " << tempNode->getValue() << endl;
+    else
+        cout << "Node not found" << endl;
 }
