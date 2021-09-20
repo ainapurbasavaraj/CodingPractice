@@ -44,10 +44,11 @@ vector<int> mergerHelper(vector<int> leftArray, vector<int> rightArray) {
 	return sortedArray;
 }
 
-vector<int> mergeSort(vector<int> array) {
+vector<int> mergeSort(vector<int> array, int depth=0) {
 	// Write your code here.
 
-	//cout << "This thread " << std::this_thread::get_id << "partioning elements : " << array.size() << endl;
+	cout << "This thread " << std::this_thread::get_id << " partioning elements : " << array.size() << endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	if (array.size() <= 1)
 		return array;
 
@@ -56,15 +57,21 @@ vector<int> mergeSort(vector<int> array) {
 	vector<int> leftHalf(array.begin(), array.begin() + mid);
 	vector<int> rightHalf(array.begin() + mid, array.end());
 
-	std::future<vector<int>> left = std::async(std::launch::async, [&leftHalf]() {
-		return mergeSort(leftHalf);
-		});
-	auto right = mergeSort(rightHalf);
-
-	auto leftArray = left.get();
-	for (auto a : leftArray) {
-		cout << a << "," << endl;
+	std::future<vector<int>> left;
+	vector<int> leftArray;
+	if (depth < std::thread::hardware_concurrency()) {
+		cout << "current depth : " << depth << endl;
+		left = std::async(std::launch::async, mergeSort, leftHalf, depth+1);
 	}
+	else {
+		leftArray = mergeSort(leftHalf, depth);
+	}
+
+	auto right = mergeSort(rightHalf, depth);
+
+	if (depth < std::thread::hardware_concurrency())
+		leftArray = left.get();
+
 	return mergerHelper(leftArray,right);
 
 }
@@ -72,10 +79,11 @@ vector<int> mergeSort(vector<int> array) {
 
 int main()
 {
-	auto array = mergeSort({ 8, 5, 2, 9, 5, 6, 3 });
+	auto array = mergeSort({ 8, 5, 2, 9, 5, 6, 3,23,6547,66,23,12,3,8,90,655,44,33,22,678,533,245,45,76,789,465,35,4,23,654,456,456,46,345,24,23,45,
+		8, 5, 2, 9, 5, 6, 3,23,6547,66,23,12,3,8,90,655,44,33,22,678,533,245,45,76,789,465,35,4,23,654,456,456,46,345,24,23,45 });
 
 	for (auto elem : array) {
-		//cout << elem << " , ";
+		cout << elem << " , ";
 	}
 }
 
