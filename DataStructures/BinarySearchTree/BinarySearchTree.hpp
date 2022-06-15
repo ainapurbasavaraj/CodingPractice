@@ -24,23 +24,49 @@ public:
     std::shared_ptr<BST<T>> deleteNode(std::shared_ptr<BST<T>> root, std::shared_ptr<BST<T>> parent, const T value);
     std::shared_ptr<BST<T>> find(std::shared_ptr<BST<T>>& root, const T& value);
     void display(std::shared_ptr<BST<T>>& root);
+    void printcurrentLevel(std::shared_ptr<BST<T>>& root, int level,string space, bool isLeft=true);
     bool isBST(std::shared_ptr<BST<T>>& root);
     bool isBST(std::shared_ptr<BST<T>>& root, T minvalue, T maxvalue);
-
+    T getMinValue(std::shared_ptr<BST<T>> root);
+    int getHeight(std::shared_ptr<BST<T>> root);
     //friend function to test binary search tree
     friend void testBST();
 };
 
 template<typename T>
+int BST<T>::getHeight(std::shared_ptr<BST<T>> root){
+    if (root == nullptr)
+        return 0;
+    return (1 + max(getHeight(root->_left),getHeight(root->_right))); 
+}
+
+template<typename T>
+void BST<T>::printcurrentLevel(std::shared_ptr<BST<T>>& root, int level,string space, bool isLeft)
+{
+    if (root == nullptr)
+       return;
+    if (level == 1){
+        if (isLeft)
+	    cout<<space<< root->value << " ";
+	else
+	    cout<<space<< root->value;
+    }else{
+	printcurrentLevel(root->_left,level-1,space.substr(0,space.length()-1),true);
+	printcurrentLevel(root->_right,level-1,space.substr(0,space.length()+1),false);
+    }
+
+}
+
+//TO DO - DISPLAY PROPERLY
+template<typename T>
 void BST<T>::display(std::shared_ptr<BST<T>>& root) {
-    if (!root)
-        return;
-
-    display(root->_left);
-    cout << root->value << endl;
-    display(root->_right);
-
-
+    
+    int h = this->getHeight(root);
+    std::string space(h,' ');
+    for (int i=1; i<=h; i++){
+	printcurrentLevel(root,i,space,false);
+        cout<<endl;
+    }
 }
 
 template<typename T>
@@ -67,6 +93,55 @@ std::shared_ptr<BST<T>> BST<T>::insert(std::shared_ptr<BST<T>>& node, T value)
     return node;
 }
 
+template<typename T>
+T BST<T>::getMinValue(std::shared_ptr<BST<T>> root){
+
+	while (root->_left != nullptr){
+	    root = root->_left;
+	}
+	return root->value;
+}
+
+template <typename T>
+std::shared_ptr<BST<T>> BST<T>::deleteNode(std::shared_ptr<BST<T>> root, std::shared_ptr<BST<T>> parent, const T value){
+
+    auto currentNode = root;
+    while (currentNode != nullptr){
+	if (currentNode->value < value){
+	    parent = currentNode;
+            currentNode = currentNode->_right;
+	}else if (currentNode->value > value){
+	    parent = currentNode;
+            currentNode = currentNode->_left;
+	}else{
+	    if (currentNode->_left != nullptr && currentNode->_right != nullptr){
+	        currentNode->value = this->getMinValue(currentNode->_right);
+                deleteNode(currentNode->_right,nullptr,currentNode->value); 
+            }else if (parent == nullptr){
+		if (currentNode->_left != nullptr){
+  		    auto temp = currentNode;
+		    currentNode = currentNode->_left;
+                    temp->_left = nullptr;
+		}else if (currentNode->_right != nullptr){
+		    auto temp = currentNode;
+		    currentNode = currentNode->_right;
+                    temp->_right = nullptr;
+		}else{
+		    return nullptr;
+		}
+	    }else if (parent->_left == currentNode){
+	        parent->_left = currentNode->_left != nullptr ? currentNode->_left : currentNode->_right;
+ 	    }else if (parent->_right == currentNode){
+	        parent->_right = currentNode->_right != nullptr ? currentNode->_right : currentNode->_left;
+	    }else{
+		break;
+	    }
+	}
+    }
+    return root;
+}
+
+/*
 template <typename T>
 std::shared_ptr<BST<T>> BST<T>::deleteNode(std::shared_ptr<BST<T>> root, std::shared_ptr<BST<T>> parent, const T value) {
     if (!parent || !root)
@@ -137,7 +212,7 @@ std::shared_ptr<BST<T>> BST<T>::deleteNode(std::shared_ptr<BST<T>> root, std::sh
     }
     return root;
 }
-
+*/
 template <typename T>
 bool BST<T>::isBST(std::shared_ptr<BST<T>>& root, T minvalue, T maxvalue) {
 

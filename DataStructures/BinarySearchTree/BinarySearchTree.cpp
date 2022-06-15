@@ -29,11 +29,23 @@ int main()
     node->insert(node, 7);
     node->insert(node, 6);
     node->insert(node, 3);
+    node->insert(node, 11);
+    node->insert(node, 4);
     node->display(node);
     //testBST();
 
-    auto deletedNode = node->deleteNode(node, node, 6);
-    cout << "Tree after deleting" << endl;
+    auto deletedNode = node->deleteNode(node, nullptr, 2);
+    cout << "Tree after deleting 6" << endl;
+    node->display(deletedNode);
+    if (node->isBST(deletedNode)) {
+        cout << "This is Binary search tree" << endl;
+    }
+    else {
+        cout << "This is not Binary search treee" << endl;
+    }
+
+    deletedNode = node->deleteNode(node, nullptr, 5);
+    cout << "Tree after deleting 5" << endl;
     node->display(deletedNode);
     if (node->isBST(deletedNode)) {
         cout << "This is Binary search tree" << endl;
